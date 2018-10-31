@@ -29,7 +29,6 @@
             width: 800px;
             margin: 0px auto;
         }
-
     </style>
 </head>
 
@@ -53,94 +52,64 @@
         name: "I",
         rotations: [
             0x0F00, 0x2222, 0x00F0, 0x4444
-        ]
+        ],
+        color: 'red'
     };
 
     var j = {
         name: "J",
         rotations: [
             0x8E00, 0x6440, 0x0E20, 0x44C0
-        ]
+        ],
+        color: 'orange'
     }
 
     var l = {
         name: "L",
         rotations: [
             0x2E00, 0x4460, 0x0E80, 0xC440
-        ]
+        ],
+        color: 'yellow'
     }
 
     var o = {
         name: "O",
         rotations: [
             0x6600, 0x6600, 0x6600, 0x6600
-        ]
+        ],
+        color: 'green'
     }
 
     var s = {
         name: "S",
         rotations: [
             0x6C00, 0x4620, 0x06C0, 0x8C40
-        ]
+        ],
+        color: 'blue'
     }
 
     var t = {
         name: "T",
         rotations: [
             0x4E00, 0x4640, 0x0E40, 0x4C40
-        ]
+        ],
+        color: 'purple'
     }
 
     var z = {
         name: "Z",
         rotations: [
             0xC600, 0x2640, 0x0C60, 0x4C80
-        ]
+        ],
+        color: 'cyan'
     }
-
-    function drawRotation(rotation) {
-        var result = "";
-        var row = 0;
-        var col = 0;
-
-        for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
-            if (rotation & bit) {
-                result += "1";
-            } else {
-                result += "0";
-            }
-
-            if (++col === 4) {
-                result += "\n";
-                col = 0;
-                ++row;
-            }
-        }
-
-        console.log(result);
-    }
-
-    function drawRotations(tetromino) {
-        console.log(tetromino.name);
-        for (var i = 0; i < tetromino.rotations.length; i++) {
-            drawRotation(tetromino.rotations[i]);
-            console.log();
-        }
-    }
-
-    // var tetrominoes = [i, j, l, o, s, t, z];
-
-    // tetrominoes.forEach(tetromino => {
-    //     drawRotations(tetromino);
-    // });
 
     function drop() {
-        state.y += 10;
+        state.y += 1;
     }
 
     var blockSize = 10;
-    var stepTime = 5;
-
+    var stepTime = 2;
 
     var canvas = document.getElementById("game-viewport");
     var width = canvas.width;
@@ -152,54 +121,52 @@
 
     let state = {
         timePlayed: 0,
-        x: width / 2,
+        x: 5,
         y: 0,
-        pressedKeys: {
-            left: false,
-            right: false,
-            up: false,
-            down: false
-        }
+        actions: []
     }
 
     // Input
 
-    var keyMap = {
-        87: 'up', // w
-        65: 'left', // a
-        83: 'down', // s
-        68: 'right', // d
+    var DIR = {
+        up: "up",
+        down: "down",
+        left: "left",
+        right: "right"
     }
 
-    function keydown(event) {
-        var key = keyMap[event.keyCode];
-        state.pressedKeys[key] = true;
+    var keyMap = {
+        87: DIR.up, // w
+        65: DIR.left, // a
+        83: DIR.down, // s
+        68: DIR.right, // d
     }
 
     function keyup(event) {
         var key = keyMap[event.keyCode];
-        state.pressedKeys[key] = false;
+        state.actions.push(key);
     }
 
-    window.addEventListener("keydown", keydown, false)
-    window.addEventListener("keyup", keyup, false)
+    window.addEventListener("keyup", keyup, false);
 
     // Game Loop
 
     function update(progress) {
-        if (state.pressedKeys.left) {
-            state.x -= speed;
+
+        var nextAction = state.actions.shift();
+        if (nextAction == DIR.left) {
+            state.x -= 1;
         }
 
-        if (state.pressedKeys.right) {
-            state.x += speed;
+        if (nextAction == DIR.right) {
+            state.x += 1;
         }
 
-        if (state.pressedKeys.up) {
+        if (nextAction == DIR.up) {
             // rotate
         }
 
-        if (state.pressedKeys.down) {
+        if (nextAction == DIR.down) {
             drop();
         }
 
@@ -212,23 +179,41 @@
 
     }
 
-    function draw() {
+    function drawBlock(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+
+        ctx.save();
+    }
+
+    function draw(shape) {
         ctx.clearRect(0, 0, width, height);
 
-        ctx.fillRect(state.x - 5, state.y - 5, blockSize, blockSize);
-        ctx.save();
+        var row = 0;
+        var col = 0;
+
+        for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
+            if (shape.rotations[0] & bit) {
+                drawBlock(col + state.x, row + state.y, shape.color);
+            }
+
+            if (++col === 4) {
+                col = 0;
+                ++row;
+            }
+        }
     }
 
     function loop(timestamp) {
         var progress = timestamp - lastRender;
 
-        update(progress / 1000.0);
-        draw();
+        update(progress / 1000);
+        draw(j);
 
         lastRender = timestamp;
         window.requestAnimationFrame(loop);
     }
-    
+
     var lastRender = 0;
     window.requestAnimationFrame(loop);
 </script>
