@@ -9,10 +9,6 @@
             margin: 0;
         }
 
-        button:hover {
-            background: #2E88C5;
-        }
-
         h1 {
             background: #e74c3c;
             padding: 20px;
@@ -93,7 +89,7 @@
         rotations: [
             0x4E00, 0x4640, 0x0E40, 0x4C40
         ],
-        color: 'purple'
+        color: 'cyan'
     }
 
     var z = {
@@ -101,11 +97,30 @@
         rotations: [
             0xC600, 0x2640, 0x0C60, 0x4C80
         ],
-        color: 'cyan'
+        color: 'magenta'
     }
 
     function drop() {
         state.y += 1;
+    }
+
+    function move(dir) {
+        var nextX = state.x + dir;
+        if (!occupied(nextX, state.y, state.currentShape.color)){
+            state.x += dir;
+        };
+    }
+
+    function occupied(x, y, color) {
+        var result = false;
+
+        each(function(x, y, color) {
+            if ((x < 0) || (x*blockSize >= width) || (y < 0) || (y*blockSize >= height)) {
+                result = true;
+            }
+        })
+
+        return result;
     }
 
     var blockSize = 20;
@@ -121,7 +136,7 @@
 
     let state = {
         currentRotationIndex: 0,
-        currentShape: j,
+        currentShape: s,
         timePlayed: 0,
         x: 5,
         y: 0,
@@ -156,29 +171,27 @@
     function update(progress) {
 
         var nextAction = state.actions.shift();
-        if (nextAction == DIR.left) {
-            state.x -= 1;
-        }
 
-        if (nextAction == DIR.right) {
-            state.x += 1;
-        }
-
-        if (nextAction == DIR.up) {
-            rotate();
-        }
-
-        if (nextAction == DIR.down) {
-            drop();
+        switch (nextAction) {
+            case DIR.left:
+                move(-1);
+                break;
+            case DIR.right:
+                move(1);
+                break;
+            case DIR.up:
+                rotate();
+                break;
+            case DIR.down:
+                drop();
+                break;
         }
 
         state.timePlayed += progress;
         if (state.timePlayed > stepTime) {
             drop();
-
             state.timePlayed -= stepTime;
         }
-
     }
 
     function drawBlock(x, y, color) {
@@ -188,21 +201,24 @@
         ctx.save();
     }
 
-    function rotate(){
+    function rotate() {
         var nextIndex = state.currentRotationIndex + 1;
         state.currentRotationIndex = nextIndex >= state.currentShape.rotations.length ? 0 : nextIndex;
     }
 
     function draw() {
-        var shape = state.currentShape;
         ctx.clearRect(0, 0, width, height);
 
+        each(drawBlock);
+    }
+
+    function each(func) {
         var row = 0;
         var col = 0;
 
         for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
-            if (shape.rotations[state.currentRotationIndex] & bit) {
-                drawBlock(col + state.x, row + state.y, shape.color);
+            if (state.currentShape.rotations[state.currentRotationIndex] & bit) {
+                func(col + state.x, row + state.y, state.currentShape.color);
             }
 
             if (++col === 4) {
@@ -212,18 +228,22 @@
         }
     }
 
-    function loop(timestamp) {
-        var progress = timestamp - lastRender;
+    function run() {
+        function loop(timestamp) {
+            var progress = timestamp - lastRender;
 
-        update(progress / 1000);
-        draw();
+            update(progress / 1000);
+            draw();
 
-        lastRender = timestamp;
+            lastRender = timestamp;
+            window.requestAnimationFrame(loop);
+        }
+
+        var lastRender = 0;
         window.requestAnimationFrame(loop);
     }
 
-    var lastRender = 0;
-    window.requestAnimationFrame(loop);
+    run();
 </script>
 
 </html>
