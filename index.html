@@ -38,7 +38,7 @@
     </header>
     <div>
         <div class="container">
-            <canvas id="game-viewport" class="game-viewport" width="100" height="240"></canvas>
+            <canvas id="game-viewport" class="game-viewport" width="200" height="480"></canvas>
 
             <h2>About</h2>
             Left and right move the tetromino sideways. Up rotates the tetromino clockwise. Down drops the tetromino
@@ -108,7 +108,7 @@
         state.y += 1;
     }
 
-    var blockSize = 10;
+    var blockSize = 20;
     var stepTime = 2;
 
     var canvas = document.getElementById("game-viewport");
@@ -120,6 +120,8 @@
     // Game State
 
     let state = {
+        currentRotationIndex: 0,
+        currentShape: j,
         timePlayed: 0,
         x: 5,
         y: 0,
@@ -163,7 +165,7 @@
         }
 
         if (nextAction == DIR.up) {
-            // rotate
+            rotate();
         }
 
         if (nextAction == DIR.down) {
@@ -186,14 +188,20 @@
         ctx.save();
     }
 
-    function draw(shape) {
+    function rotate(){
+        var nextIndex = state.currentRotationIndex + 1;
+        state.currentRotationIndex = nextIndex >= state.currentShape.rotations.length ? 0 : nextIndex;
+    }
+
+    function draw() {
+        var shape = state.currentShape;
         ctx.clearRect(0, 0, width, height);
 
         var row = 0;
         var col = 0;
 
         for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
-            if (shape.rotations[0] & bit) {
+            if (shape.rotations[state.currentRotationIndex] & bit) {
                 drawBlock(col + state.x, row + state.y, shape.color);
             }
 
@@ -208,7 +216,7 @@
         var progress = timestamp - lastRender;
 
         update(progress / 1000);
-        draw(j);
+        draw();
 
         lastRender = timestamp;
         window.requestAnimationFrame(loop);
