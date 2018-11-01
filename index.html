@@ -104,17 +104,17 @@
         state.y += 1;
     }
 
-    function move(dir) {
-        var nextX = state.x + dir;
-        if (!occupied(nextX, state.y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color)) {
-            state.x += dir;
+    function move(direction) {
+        var nextX = state.x + direction;
+        if (!occupied(nextX, state.y, state.currentShape, state.rotationIdx)) {
+            state.x = nextX;
         };
     }
 
-    function occupied(x, y, rotation, color) {
+    function occupied(x, y, shape, rotationIdx) {
         var result = false;
 
-        each(x, y, rotation, state.currentShape.color, function (x, y, color) {
+        each(x, y, shape, rotationIdx, function (x, y) {
             if ((x < 0) || (x * blockSize >= width) || (y < 0) || (y * blockSize >= height)) {
                 result = true;
             }
@@ -135,8 +135,8 @@
     // Game State
 
     let state = {
-        currentRotationIndex: 0,
-        currentShape: l,
+        rotationIdx: 0,
+        currentShape: z,
         timePlayed: 0,
         x: 5,
         y: 0,
@@ -145,7 +145,7 @@
 
     // Input
 
-    var DIR = {
+    var KEY = {
         up: "up",
         down: "down",
         left: "left",
@@ -153,10 +153,10 @@
     }
 
     var keyMap = {
-        87: DIR.up, // w
-        65: DIR.left, // a
-        83: DIR.down, // s
-        68: DIR.right, // d
+        87: KEY.up, // w
+        65: KEY.left, // a
+        83: KEY.down, // s
+        68: KEY.right, // d
     }
 
     function keyup(event) {
@@ -173,16 +173,16 @@
         var nextAction = state.actions.shift();
 
         switch (nextAction) {
-            case DIR.left:
+            case KEY.left:
                 move(-1);
                 break;
-            case DIR.right:
+            case KEY.right:
                 move(1);
                 break;
-            case DIR.up:
+            case KEY.up:
                 rotate();
                 break;
-            case DIR.down:
+            case KEY.down:
                 drop();
                 break;
         }
@@ -202,30 +202,27 @@
     }
 
     function rotate() {
-        var nextIndex = state.currentRotationIndex + 1;
-        var nextIndex = nextIndex >= state.currentShape.rotations.length ? 0 : nextIndex;
-        var nextRotation = state.currentShape.rotations[nextIndex];
+        var nextIndex = state.rotationIdx == 3 ? 0 : state.rotationIdx + 1;
 
-        if (!occupied(state.x, state.y, nextRotation, state.currentShape.color)){
-            state.currentRotationIndex = nextIndex;
+        if (!occupied(state.x, state.y, state.currentShape, nextIndex)){
+            state.rotationIdx = nextIndex;
         }
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
 
-        each(state.x, state.y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color,
-            drawBlock);
-
+        each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
     }
 
-    function each(x, y, rotation, color, func) {
+    function each(x, y, shape, rotationIdx, func) {
         var row = 0;
         var col = 0;
+        var rotation = shape.rotations[rotationIdx];
 
         for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
             if (rotation & bit) {
-                func(col + x, row + y, color);
+                func(col + x, row + y, shape.color);
             }
 
             if (++col === 4) {
