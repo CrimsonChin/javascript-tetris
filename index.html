@@ -106,16 +106,16 @@
 
     function move(dir) {
         var nextX = state.x + dir;
-        if (!occupied(nextX, state.y, state.currentShape.color)){
+        if (!occupied(nextX, state.y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color)) {
             state.x += dir;
         };
     }
 
-    function occupied(x, y, color) {
+    function occupied(x, y, rotation, color) {
         var result = false;
 
-        each(x, y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color, function(x, y, color) {
-            if ((x < 0) || (x*blockSize >= width) || (y < 0) || (y*blockSize >= height)) {
+        each(x, y, rotation, state.currentShape.color, function (x, y, color) {
+            if ((x < 0) || (x * blockSize >= width) || (y < 0) || (y * blockSize >= height)) {
                 result = true;
             }
         })
@@ -203,14 +203,20 @@
 
     function rotate() {
         var nextIndex = state.currentRotationIndex + 1;
-        state.currentRotationIndex = nextIndex >= state.currentShape.rotations.length ? 0 : nextIndex;
+        var nextIndex = nextIndex >= state.currentShape.rotations.length ? 0 : nextIndex;
+        var nextRotation = state.currentShape.rotations[nextIndex];
+
+        if (!occupied(state.x, state.y, nextRotation, state.currentShape.color)){
+            state.currentRotationIndex = nextIndex;
+        }
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
 
-        each(state.x, state.y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color, drawBlock);
-        
+        each(state.x, state.y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color,
+            drawBlock);
+
     }
 
     function each(x, y, rotation, color, func) {
