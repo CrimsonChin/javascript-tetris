@@ -114,7 +114,7 @@
     function occupied(x, y, color) {
         var result = false;
 
-        each(function(x, y, color) {
+        each(x, y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color, function(x, y, color) {
             if ((x < 0) || (x*blockSize >= width) || (y < 0) || (y*blockSize >= height)) {
                 result = true;
             }
@@ -136,7 +136,7 @@
 
     let state = {
         currentRotationIndex: 0,
-        currentShape: s,
+        currentShape: l,
         timePlayed: 0,
         x: 5,
         y: 0,
@@ -209,16 +209,17 @@
     function draw() {
         ctx.clearRect(0, 0, width, height);
 
-        each(drawBlock);
+        each(state.x, state.y, state.currentShape.rotations[state.currentRotationIndex], state.currentShape.color, drawBlock);
+        
     }
 
-    function each(func) {
+    function each(x, y, rotation, color, func) {
         var row = 0;
         var col = 0;
 
         for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
-            if (state.currentShape.rotations[state.currentRotationIndex] & bit) {
-                func(col + state.x, row + state.y, state.currentShape.color);
+            if (rotation & bit) {
+                func(col + x, row + y, color);
             }
 
             if (++col === 4) {
