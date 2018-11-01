@@ -37,8 +37,8 @@
             <canvas id="game-viewport" class="game-viewport" width="200" height="480"></canvas>
 
             <h2>About</h2>
-            Left and right move the tetromino sideways. Up rotates the tetromino clockwise. Down drops the tetromino
-            one row.
+            <p><b>A</b> (left) and <b>D</b> (right) move the tetromino sideways. <b>W</b> rotates the tetromino clockwise. <b>S</b> drops the tetromino
+            one row.</p>
         </div>
     </div>
 </body>
@@ -202,6 +202,7 @@
     }
 
     function rotate() {
+        // Each shape has exactly 4 rotations
         var nextIndex = state.rotationIdx == 3 ? 0 : state.rotationIdx + 1;
 
         if (!occupied(state.x, state.y, state.currentShape, nextIndex)){
