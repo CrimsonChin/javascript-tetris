@@ -37,8 +37,8 @@
             <canvas id="game-viewport" class="game-viewport" width="200" height="480"></canvas>
 
             <h2>About</h2>
-            <p><b>A</b> (left) and <b>D</b> (right) move the tetromino sideways. <b>W</b> rotates the tetromino clockwise. <b>S</b> drops the tetromino
-            one row.</p>
+            <p><b>A</b> (left) and <b>D</b> (right) move the tetromino sideways. <b>W</b> rotates the tetromino
+                clockwise. <b>S</b> drops the tetromino one row.</p>
         </div>
     </div>
 </body>
@@ -100,15 +100,54 @@
         color: 'magenta'
     }
 
+    function random(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function setRandomShape() {
+        if (state.pieces.length == 0) {
+            pieces = [i, i, i, i, j, j, j, j, l, l, l, l, o, o, o, o, s, s, s, s, t, t, t, t, z, z, z, z];
+        }
+
+        var shape = pieces.splice(random(0, pieces.length - 1), 1)[0];
+        state.currentShape = shape;
+        state.rotationIdx = 0;
+        state.x = 4;
+        state.y = 0;
+    }
+
     function drop() {
-        state.y += 1;
+        if (!move(DIR.down)) {
+            setRandomShape();
+        }
     }
 
     function move(direction) {
-        var nextX = state.x + direction;
-        if (!occupied(nextX, state.y, state.currentShape, state.rotationIdx)) {
-            state.x = nextX;
-        };
+        var nextX = state.x;
+        var nextY = state.y;
+
+        switch (direction) {
+            case DIR.left:
+                nextX--;
+                break;
+            case DIR.right:
+                nextX++;
+                break;
+            case DIR.down:
+                nextY++;
+                break;
+        }
+
+        if (occupied(nextX, nextY, state.currentShape, state.rotationIdx)) {
+            return false;
+        }
+
+        state.x = nextX;
+        state.y = nextY;
+
+        return true;
     }
 
     function occupied(x, y, shape, rotationIdx) {
@@ -123,39 +162,42 @@
         return result;
     }
 
-    var blockSize = 20;
-    var stepTime = 2;
+    // Constants
 
-    var canvas = document.getElementById("game-viewport");
-    var width = canvas.width;
-    var height = canvas.height;
-    var ctx = canvas.getContext("2d");
+    const blockSize = 20;
+    const stepTime = 1;
+
+    const canvas = document.getElementById("game-viewport");
+    const width = canvas.width;
+    const height = canvas.height;
+    const ctx = canvas.getContext("2d");
+
+    const DIR = {
+        left: "left",
+        right: "Right",
+        up: "up",
+        down: "Down"
+    }
 
     // Game State
 
     let state = {
         rotationIdx: 0,
-        currentShape: z,
+        currentShape: null,
         timePlayed: 0,
-        x: 5,
+        x: 0,
         y: 0,
-        actions: []
+        actions: [],
+        pieces: []
     }
 
     // Input
 
-    var KEY = {
-        up: "up",
-        down: "down",
-        left: "left",
-        right: "right"
-    }
-
     var keyMap = {
-        87: KEY.up, // w
-        65: KEY.left, // a
-        83: KEY.down, // s
-        68: KEY.right, // d
+        87: DIR.up, // w
+        65: DIR.left, // a
+        83: DIR.down, // s
+        68: DIR.right, // d
     }
 
     function keyup(event) {
@@ -172,16 +214,16 @@
         var nextAction = state.actions.shift();
 
         switch (nextAction) {
-            case KEY.left:
-                move(-1);
+            case DIR.left:
+                move(DIR.left);
                 break;
-            case KEY.right:
-                move(1);
+            case DIR.right:
+                move(DIR.right);
                 break;
-            case KEY.up:
+            case DIR.up:
                 rotate();
                 break;
-            case KEY.down:
+            case DIR.down:
                 drop();
                 break;
         }
@@ -194,25 +236,38 @@
     }
 
     function drawBlock(x, y, color) {
+        ctx.save();
+
+        ctx.lineWidth = 1;
+        ctx.translate(0.5, 0.5);
+
         ctx.fillStyle = color;
         ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        ctx.strokeStyle = 'black';
+        ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
 
-        ctx.save();
+        ctx.restore();
     }
 
     function rotate() {
         // Each shape has exactly 4 rotations
         var nextIndex = state.rotationIdx == 3 ? 0 : state.rotationIdx + 1;
 
-        if (!occupied(state.x, state.y, state.currentShape, nextIndex)){
+        if (!occupied(state.x, state.y, state.currentShape, nextIndex)) {
             state.rotationIdx = nextIndex;
         }
     }
 
     function draw() {
+        ctx.save();
+
         ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, width, height);
 
         each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
+
+        ctx.restore();
     }
 
     function each(x, y, shape, rotationIdx, func) {
@@ -245,6 +300,10 @@
 
         var lastRender = 0;
         window.requestAnimationFrame(loop);
+
+        // Reset game etc
+            setRandomShape();
+
     }
 
     run();
