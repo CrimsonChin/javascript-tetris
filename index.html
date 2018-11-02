@@ -73,7 +73,7 @@
         rotations: [
             0x6600, 0x6600, 0x6600, 0x6600
         ],
-        color: 'green'
+        color: 'yellowgreen'
     }
 
     var s = {
@@ -108,10 +108,10 @@
 
     function setRandomShape() {
         if (state.pieces.length == 0) {
-            pieces = [i, i, i, i, j, j, j, j, l, l, l, l, o, o, o, o, s, s, s, s, t, t, t, t, z, z, z, z];
+            state.pieces = [i, i, i, i, j, j, j, j, l, l, l, l, o, o, o, o, s, s, s, s, t, t, t, t, z, z, z, z];
         }
 
-        var shape = pieces.splice(random(0, pieces.length - 1), 1)[0];
+        var shape = state.pieces.splice(random(0, state.pieces.length - 1), 1)[0];
         state.currentShape = shape;
         state.rotationIdx = 0;
         state.x = 4;
@@ -262,7 +262,7 @@
         ctx.save();
 
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = '#eee';
         ctx.fillRect(0, 0, width, height);
 
         each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
