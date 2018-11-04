@@ -34,7 +34,7 @@
     </header>
     <div>
         <div class="container">
-            <canvas id="game-viewport" class="game-viewport" width="200" height="480"></canvas>
+            <canvas id="game-viewport" class="game-viewport" width="200" height="400"></canvas>
 
             <h2>Instructions</h2>
             <ul>
@@ -110,22 +110,38 @@
         return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    function setRandomShape() {
+    function getRandomShape() {
         if (state.pieces.length == 0) {
             state.pieces = [i, i, i, i, j, j, j, j, l, l, l, l, o, o, o, o, s, s, s, s, t, t, t, t, z, z, z, z];
         }
 
-        var shape = state.pieces.splice(random(0, state.pieces.length - 1), 1)[0];
+        return state.pieces.splice(random(0, state.pieces.length - 1), 1)[0];
+    }
+
+    function setCurrentShape(shape) {
         state.currentShape = shape;
         state.rotationIdx = 0;
         state.x = 4;
         state.y = 0;
     }
 
+    function setShape() {
+        each(state.x, state.y, state.currentShape, state.rotationIdx, function (x, y, shape) {
+            state.board[y][x] = shape;
+        })
+    }
+
     function drop() {
         if (!move(DIR.down)) {
-            setRandomShape();
+            setShape();
+
+            var shape = getRandomShape();
+            setCurrentShape(shape);
         }
+    }
+
+    function getBlock(x, y){
+        return state.board[y][x];
     }
 
     function move(direction) {
@@ -158,7 +174,7 @@
         var result = false;
 
         each(x, y, shape, rotationIdx, function (x, y) {
-            if ((x < 0) || (x * blockSize >= width) || (y < 0) || (y * blockSize >= height)) {
+            if ((x < 0) || (x * blockSize >= width) || (y < 0) || (y * blockSize >= height) || getBlock(x, y)) {
                 result = true;
             }
         })
@@ -192,7 +208,8 @@
         x: 0,
         y: 0,
         actions: [],
-        pieces: []
+        pieces: [],
+        board: []
     }
 
     // Input
@@ -239,13 +256,13 @@
         }
     }
 
-    function drawBlock(x, y, color) {
+    function drawBlock(x, y, shape) {
         ctx.save();
 
         ctx.lineWidth = 1;
         ctx.translate(0.5, 0.5);
 
-        ctx.fillStyle = color;
+        ctx.fillStyle = shape.color;
         ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
         ctx.strokeStyle = 'black';
         ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
@@ -263,7 +280,7 @@
     }
 
     function draw() {
-        ctx.save();
+        // ctx.save();
 
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = '#eee';
@@ -271,7 +288,16 @@
 
         each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
 
-        ctx.restore();
+        for (var r = 0; r < state.board.length; r++) {
+            for (var c = 0; c < state.board[r].length; c++) {
+                var shape = getBlock(c, r);
+                if (shape){
+                    drawBlock(c, r, shape);
+                }
+            }
+        }
+
+        // ctx.restore();
     }
 
     function each(x, y, shape, rotationIdx, func) {
@@ -281,7 +307,7 @@
 
         for (var bit = 0x8000; bit > 0; bit = bit >> 1) {
             if (rotation & bit) {
-                func(col + x, row + y, shape.color);
+                func(col + x, row + y, shape);
             }
 
             if (++col === 4) {
@@ -306,8 +332,14 @@
         window.requestAnimationFrame(loop);
 
         // Reset game etc
-            setRandomShape();
+        var shape = getRandomShape();
+        setCurrentShape(shape);
 
+        //state.board = new Array(20).fill(new Array(10).fill(0));
+        state.board = new Array(20);
+        for (var i = 0; i < state.board.length; i++){
+            state.board[i] = new Array(10);
+        }
     }
 
     run();
