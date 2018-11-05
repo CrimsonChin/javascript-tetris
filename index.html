@@ -131,16 +131,45 @@
         })
     }
 
+    function removeCompleteLines() {
+        var board = state.board;
+        var nextBoard = [];
+
+        for (var r = 0; r < board.length; r++) {
+            var row = board[i];
+            var isComplete = true;
+            
+            for (var c = 0; c < row.length; c++) {
+                if (!row[c]) {
+                    isComplete = false;
+                }
+            }
+
+            if (!isComplete) {
+                nextBoard.push(row);
+            }
+        }
+
+        while (nextBoard.length < (height / blockSize)) {
+            nextBoard.unshift(new Array(width / blockSize).fill(0));
+        }
+
+        state.board = nextBoard;
+    }
+
+
     function drop() {
         if (!move(DIR.down)) {
             setShape();
+
+            removeCompleteLines();
 
             var shape = getRandomShape();
             setCurrentShape(shape);
         }
     }
 
-    function getBlock(x, y){
+    function getBlock(x, y) {
         return state.board[y][x];
     }
 
@@ -291,7 +320,7 @@
         for (var r = 0; r < state.board.length; r++) {
             for (var c = 0; c < state.board[r].length; c++) {
                 var shape = getBlock(c, r);
-                if (shape){
+                if (shape) {
                     drawBlock(c, r, shape);
                 }
             }
@@ -335,9 +364,11 @@
         var shape = getRandomShape();
         setCurrentShape(shape);
 
+        // This fills the board with copies of the same array.
         //state.board = new Array(20).fill(new Array(10).fill(0));
+
         state.board = new Array(20);
-        for (var i = 0; i < state.board.length; i++){
+        for (var i = 0; i < state.board.length; i++) {
             state.board[i] = new Array(10);
         }
     }
