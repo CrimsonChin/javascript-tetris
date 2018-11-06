@@ -136,17 +136,12 @@
         var nextBoard = [];
 
         for (var r = 0; r < board.length; r++) {
-            var row = board[i];
-            var isComplete = true;
-            
+            var row = board[r];
             for (var c = 0; c < row.length; c++) {
                 if (!row[c]) {
-                    isComplete = false;
+                    nextBoard.push(row);
+                    break;
                 }
-            }
-
-            if (!isComplete) {
-                nextBoard.push(row);
             }
         }
 
