@@ -131,33 +131,83 @@
         })
     }
 
+    // TODO performance test this
     function removeCompleteLines() {
         var board = state.board;
         var nextBoard = [];
 
-        for (var r = 0; r < board.length; r++) {
-            var row = board[r];
-            for (var c = 0; c < row.length; c++) {
-                if (!row[c]) {
+        for (var y = 0; y < height; y++) {
+            var row = board[y];
+            for (var x = 0; x < width; x++) {
+                if (!row[x]) {
                     nextBoard.push(row);
                     break;
                 }
             }
         }
 
-        while (nextBoard.length < (height / blockSize)) {
-            nextBoard.unshift(new Array(width / blockSize).fill(0));
+        var clearedLineCount = 0;
+        while (nextBoard.length < height) {
+            nextBoard.unshift(new Array(width).fill(0));
+            clearedLineCount++;
         }
 
         state.board = nextBoard;
+
+        return clearedLineCount;
     }
 
+    // function removeCompleteLines() {
+    //     var completeLineCount = 0;
+
+    //     for (var y = height; y >= 0; --y) {
+    //         var isComplete = true;
+    //         for (var x = 0; x < width; x++) {
+    //             if (!getBlock(x, y)) {
+    //                 isComplete = false;
+    //             }
+    //         }
+
+    //         if (isComplete) {
+    //             completeLineCount++;
+    //             // Splice row?
+    //             // copy row above down?
+    //         }
+    //     }
+
+    //     return completeLineCount;
+    // }
+
+
+    function setScore(clearedLines, level) {
+        let multiplier = 0;
+        switch (clearedLines) {
+            case 1:
+                multiplier = 40;
+                break;
+            case 2:
+                multiplier = 100;
+                break;
+            case 3:
+                multiplier = 300;
+                break;
+            case 4:
+                multiplier = 1200;
+                break;
+            default:
+                multiplier = 0;
+        }
+
+        state.score += multiplier * (level + 1);
+    }
 
     function drop() {
         if (!move(DIR.down)) {
             setShape();
 
-            removeCompleteLines();
+            var completeLines = removeCompleteLines();
+            setScore(completeLines, state.level);
+            state.totalCompletedLines += completeLines;
 
             var shape = getRandomShape();
             setCurrentShape(shape);
@@ -198,7 +248,7 @@
         var result = false;
 
         each(x, y, shape, rotationIdx, function (x, y) {
-            if ((x < 0) || (x * blockSize >= width) || (y < 0) || (y * blockSize >= height) || getBlock(x, y)) {
+            if ((x < 0) || (x >= width) || (y < 0) || (y >= height) || getBlock(x, y)) {
                 result = true;
             }
         })
@@ -208,12 +258,15 @@
 
     // Constants
 
+    const width = 10;
+    const height = 20;
+
     const blockSize = 20;
     const stepTime = 1;
 
     const canvas = document.getElementById("game-viewport");
-    const width = canvas.width;
-    const height = canvas.height;
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
     const ctx = canvas.getContext("2d");
 
     const DIR = {
@@ -226,11 +279,18 @@
     // Game State
 
     let state = {
-        rotationIdx: 0,
+        level: 0,
+        score: 0,
+        totalCompletedLines: 0,
+
+
         currentShape: null,
+        rotationIdx: 0,
+
         timePlayed: 0,
         x: 0,
         y: 0,
+
         actions: [],
         pieces: [],
         board: []
@@ -281,17 +341,10 @@
     }
 
     function drawBlock(x, y, shape) {
-        ctx.save();
-
-        ctx.lineWidth = 1;
-        ctx.translate(0.5, 0.5);
-
         ctx.fillStyle = shape.color;
         ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
         ctx.strokeStyle = 'black';
         ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
-
-        ctx.restore();
     }
 
     function rotate() {
@@ -304,24 +357,27 @@
     }
 
     function draw() {
-        // ctx.save();
+        ctx.save();
 
-        ctx.clearRect(0, 0, width, height);
+        ctx.lineWidth = 1;
+        ctx.translate(0.5, 0.5);
+
+        ctx.clearRect(0, 0, width * blockSize, height * blockSize);
         ctx.fillStyle = '#eee';
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, 0, width * blockSize, height * blockSize);
 
         each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
 
-        for (var r = 0; r < state.board.length; r++) {
-            for (var c = 0; c < state.board[r].length; c++) {
-                var shape = getBlock(c, r);
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                var shape = getBlock(x, y);
                 if (shape) {
-                    drawBlock(c, r, shape);
+                    drawBlock(x, y, shape);
                 }
             }
         }
 
-        // ctx.restore();
+        ctx.restore();
     }
 
     function each(x, y, shape, rotationIdx, func) {
@@ -364,7 +420,7 @@
 
         state.board = new Array(20);
         for (var i = 0; i < state.board.length; i++) {
-            state.board[i] = new Array(10);
+            state.board[i] = new Array(10).fill(0);
         }
     }
 
