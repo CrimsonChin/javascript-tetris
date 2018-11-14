@@ -34,7 +34,7 @@
     </header>
     <div>
         <div class="container">
-            <canvas id="game-viewport" class="game-viewport" width="200" height="400"></canvas>
+            <canvas id="game-viewport" class="game-viewport" width="400" height="400"></canvas>
 
             <h2>Instructions</h2>
             <ul>
@@ -126,7 +126,7 @@
     }
 
     function setShape() {
-        each(state.x, state.y, state.currentShape, state.rotationIdx, function (x, y, shape) {
+        each(state.x, state.y, state.currentShape, state.rotationIdx, function(x, y, shape) {
             state.board[y][x] = shape;
         })
     }
@@ -247,7 +247,7 @@
     function occupied(x, y, shape, rotationIdx) {
         var result = false;
 
-        each(x, y, shape, rotationIdx, function (x, y) {
+        each(x, y, shape, rotationIdx, function(x, y) {
             if ((x < 0) || (x >= width) || (y < 0) || (y >= height) || getBlock(x, y)) {
                 result = true;
             }
@@ -356,6 +356,40 @@
         }
     }
 
+
+    function drawText(y, text){
+
+        const xStart = 220;
+        const xEnd = 380;
+
+        ctx.strokeStyle = "red";
+        ctx.moveTo(xStart, y);
+        ctx.lineTo(xEnd, y);
+        ctx.stroke();
+
+        ctx.clearRect(xStart, y, 180, 20);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.font = "20px Georgia";
+        ctx.fillStyle = "#000";
+        ctx.fillText(text, xStart, y);
+    }
+
+    function drawLevel() {
+        const y = 20;
+        drawText(y, "Level: " + state.level);
+    }
+
+    function drawScore() {
+        const y = 60;
+        drawText(y, "Score: " + state.score);
+    }
+
+    function drawLine() {
+        const y = 100;
+        drawText(y, "Lines: " + state.totalCompletedLines);
+    }
+
     function draw() {
         ctx.save();
 
@@ -376,6 +410,10 @@
                 }
             }
         }
+        
+        drawLevel();
+        drawScore();
+        drawLine();
 
         ctx.restore();
     }
