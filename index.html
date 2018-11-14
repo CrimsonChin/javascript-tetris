@@ -118,6 +118,15 @@
         return state.pieces.splice(random(0, state.pieces.length - 1), 1)[0];
     }
 
+    function setNextShape(){
+        var shape = getRandomShape();
+        state.nextShape = shape;
+    }
+
+    function getNextShape(){
+        return state.nextShape;
+    }
+
     function setCurrentShape(shape) {
         state.currentShape = shape;
         state.rotationIdx = 0;
@@ -198,7 +207,7 @@
                 multiplier = 0;
         }
 
-        state.score += multiplier * (level + 1);
+        state.score += multiplier * (level /*+ 1*/);
     }
 
     function drop() {
@@ -209,8 +218,9 @@
             setScore(completeLines, state.level);
             state.totalCompletedLines += completeLines;
 
-            var shape = getRandomShape();
-            setCurrentShape(shape);
+            setCurrentShape(state.nextShape);
+
+            setNextShape();
         }
     }
 
@@ -283,6 +293,7 @@
         score: 0,
         totalCompletedLines: 0,
 
+        nextShape: null,
 
         currentShape: null,
         rotationIdx: 0,
@@ -370,7 +381,7 @@
         ctx.clearRect(xStart, y, 180, 20);
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
-        ctx.font = "20px Georgia";
+        ctx.font = "20px monospace";
         ctx.fillStyle = "#000";
         ctx.fillText(text, xStart, y);
     }
@@ -390,6 +401,21 @@
         drawText(y, "Lines: " + state.totalCompletedLines);
     }
 
+    function drawNext(){
+        const xStart = 220;
+        const xEnd = 380;
+        const y = 160;
+
+        ctx.strokeStyle = "red";
+        ctx.moveTo(xStart, y);
+        ctx.lineTo(xEnd, y);
+        ctx.stroke();
+
+        ctx.clearRect(xStart, y, xEnd, 80);
+
+        each(11, 8, getNextShape(), 3, drawBlock);
+    }
+
     function draw() {
         ctx.save();
 
@@ -400,8 +426,10 @@
         ctx.fillStyle = '#eee';
         ctx.fillRect(0, 0, width * blockSize, height * blockSize);
 
+        // falling block
         each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
 
+        // "set" blocks
         for (var y = 0; y < height; y++) {
             for (var x = 0; x < width; x++) {
                 var shape = getBlock(x, y);
@@ -414,6 +442,7 @@
         drawLevel();
         drawScore();
         drawLine();
+        drawNext();
 
         ctx.restore();
     }
@@ -450,8 +479,10 @@
         window.requestAnimationFrame(loop);
 
         // Reset game etc
-        var shape = getRandomShape();
+        shape = getRandomShape();
         setCurrentShape(shape);
+
+        setNextShape();
 
         // This fills the board with copies of the same array.
         //state.board = new Array(20).fill(new Array(10).fill(0));
