@@ -18,7 +18,7 @@
 
         .game-viewport {
             margin: 0px auto;
-            border: 1px black solid;
+            /* border: 1px black solid; */
         }
 
         .container {
@@ -157,13 +157,15 @@
 
         var clearedLineCount = 0;
         while (nextBoard.length < height) {
-            nextBoard.unshift(new Array(width).fill(0));
+            nextBoard.unshift(new Array(width));
             clearedLineCount++;
         }
 
         state.board = nextBoard;
 
-        return clearedLineCount;
+        state.totalCompletedLines += clearedLineCount;
+
+        setScore(clearedLineCount);
     }
 
     // function removeCompleteLines() {
@@ -188,9 +190,9 @@
     // }
 
 
-    function setScore(clearedLines, level) {
+    function setScore(completedLines) {
         let multiplier = 0;
-        switch (clearedLines) {
+        switch (completedLines) {
             case 1:
                 multiplier = 40;
                 break;
@@ -207,19 +209,16 @@
                 multiplier = 0;
         }
 
-        state.score += multiplier * (level /*+ 1*/);
+        state.score += multiplier * (getLevel() + 1);
     }
 
     function drop() {
         if (!move(DIR.down)) {
             setShape();
 
-            var completeLines = removeCompleteLines();
-            setScore(completeLines, state.level);
-            state.totalCompletedLines += completeLines;
-
+            removeCompleteLines();
+            
             setCurrentShape(state.nextShape);
-
             setNextShape();
         }
     }
@@ -289,7 +288,6 @@
     // Game State
 
     let state = {
-        level: 1,
         score: 0,
         totalCompletedLines: 0,
 
@@ -298,7 +296,7 @@
         currentShape: null,
         rotationIdx: 0,
 
-        timePlayed: 0,
+        stepTime: 0,
         x: 0,
         y: 0,
 
@@ -344,10 +342,10 @@
                 break;
         }
 
-        state.timePlayed += progress;
-        if (state.timePlayed > stepTime) {
+        state.stepTime += progress;
+        if (state.stepTime > stepTime) {
             drop();
-            state.timePlayed -= stepTime;
+            state.stepTime -= stepTime;
         }
     }
 
@@ -373,10 +371,10 @@
         const xStart = 220;
         const xEnd = 380;
 
-        ctx.strokeStyle = "red";
-        ctx.moveTo(xStart, y);
-        ctx.lineTo(xEnd, y);
-        ctx.stroke();
+        // ctx.strokeStyle = "red";
+        // ctx.moveTo(xStart, y);
+        // ctx.lineTo(xEnd, y);
+        // ctx.stroke();
 
         ctx.clearRect(xStart, y, 180, 20);
         ctx.textAlign = "left";
@@ -386,9 +384,13 @@
         ctx.fillText(text, xStart, y);
     }
 
+    function getLevel(){
+        return Math.floor(state.totalCompletedLines / 10);
+    }
+
     function drawLevel() {
         const y = 20;
-        drawText(y, "Level: " + state.level);
+        drawText(y, "Level: " + (getLevel() + 1));
     }
 
     function drawScore() {
@@ -404,14 +406,14 @@
     function drawNext(){
         const xStart = 220;
         const xEnd = 380;
-        const y = 160;
+        const y = 140;
 
-        ctx.strokeStyle = "red";
-        ctx.moveTo(xStart, y);
-        ctx.lineTo(xEnd, y);
-        ctx.stroke();
+        // ctx.strokeStyle = "red";
+        // ctx.moveTo(xStart, y);
+        // ctx.lineTo(xEnd, y);
+        // ctx.stroke();
 
-        ctx.clearRect(xStart, y, xEnd, 80);
+        ctx.clearRect(xStart, y, xEnd, 100);
 
         each(11, 8, getNextShape(), 3, drawBlock);
     }
