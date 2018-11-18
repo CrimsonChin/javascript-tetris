@@ -54,7 +54,7 @@
         rotations: [
             0x0F00, 0x2222, 0x00F0, 0x4444
         ],
-        color: 'orangered'
+        color: "orangered"
     };
 
     var j = {
@@ -62,48 +62,48 @@
         rotations: [
             0x8E00, 0x6440, 0x0E20, 0x44C0
         ],
-        color: 'orange'
-    }
+        color: "orange"
+    };
 
     var l = {
         name: "L",
         rotations: [
             0x2E00, 0x4460, 0x0E80, 0xC440
         ],
-        color: 'yellow'
-    }
+        color: "yellow"
+    };
 
     var o = {
         name: "O",
         rotations: [
             0x6600, 0x6600, 0x6600, 0x6600
         ],
-        color: 'lawngreen'
-    }
+        color: "lawngreen"
+    };
 
     var s = {
         name: "S",
         rotations: [
             0x6C00, 0x4620, 0x06C0, 0x8C40
         ],
-        color: 'deepskyblue'
-    }
+        color: "deepskyblue"
+    };
 
     var t = {
         name: "T",
         rotations: [
             0x4E00, 0x4640, 0x0E40, 0x4C40
         ],
-        color: 'violet'
-    }
+        color: "violet"
+    };
 
     var z = {
         name: "Z",
         rotations: [
             0xC600, 0x2640, 0x0C60, 0x4C80
         ],
-        color: 'deeppink'
-    }
+        color: "deeppink"
+    };
 
     function random(min, max) {
         min = Math.ceil(min);
@@ -138,7 +138,7 @@
     function setShape() {
         each(state.x, state.y, state.currentShape, state.rotationIdx, function (x, y, shape) {
             state.board[y][x] = shape;
-        })
+        });
     }
 
     // TODO performance test this
@@ -266,7 +266,7 @@
             if ((x < 0) || (x >= width) || (y < 0) || (y >= height) || getBlock(x, y)) {
                 result = true;
             }
-        })
+        });
 
         return result;
     }
@@ -280,8 +280,6 @@
     const stepTime = 1;
 
     const canvas = document.getElementById("game-viewport");
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
     const ctx = canvas.getContext("2d");
 
     const DIR = {
@@ -289,7 +287,7 @@
         right: "Right",
         up: "up",
         down: "Down"
-    }
+    };
 
     // Game State
 
@@ -311,7 +309,7 @@
         actions: [],
         pieces: [],
         board: []
-    }
+    };
 
     // Input
 
@@ -320,7 +318,7 @@
         65: DIR.left, // a
         83: DIR.down, // s
         68: DIR.right, // d
-    }
+    };
 
     function keyup(event) {
         var keyCode = event.keyCode;
@@ -499,9 +497,8 @@
         window.requestAnimationFrame(loop);
 
         // Reset game etc
-        shape = getRandomShape();
+       	var shape = getRandomShape();
         setCurrentShape(shape);
-
         setNextShape();
 
         // This fills the board with copies of the same array.
