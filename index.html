@@ -37,6 +37,7 @@
             <canvas id="game-viewport" class="game-viewport" width="400" height="400"></canvas>
 
             <h2>Instructions</h2>
+            <p>Press Spacebar to start a game.</p>
             <ul>
                 <li><b>W</b> rotate the tetromino</li>
                 <li><b>A</b> move the tetromino left</li>
@@ -118,12 +119,12 @@
         return state.pieces.splice(random(0, state.pieces.length - 1), 1)[0];
     }
 
-    function setNextShape(){
+    function setNextShape() {
         var shape = getRandomShape();
         state.nextShape = shape;
     }
 
-    function getNextShape(){
+    function getNextShape() {
         return state.nextShape;
     }
 
@@ -135,7 +136,7 @@
     }
 
     function setShape() {
-        each(state.x, state.y, state.currentShape, state.rotationIdx, function(x, y, shape) {
+        each(state.x, state.y, state.currentShape, state.rotationIdx, function (x, y, shape) {
             state.board[y][x] = shape;
         })
     }
@@ -217,9 +218,14 @@
             setShape();
 
             removeCompleteLines();
-            
+
             setCurrentShape(state.nextShape);
             setNextShape();
+
+            if (occupied(state.x, state.y, state.currentShape, state.rotationIdx)) {
+                alert("Game Over");
+                state.isPlaying = false;
+            }
         }
     }
 
@@ -256,7 +262,7 @@
     function occupied(x, y, shape, rotationIdx) {
         var result = false;
 
-        each(x, y, shape, rotationIdx, function(x, y) {
+        each(x, y, shape, rotationIdx, function (x, y) {
             if ((x < 0) || (x >= width) || (y < 0) || (y >= height) || getBlock(x, y)) {
                 result = true;
             }
@@ -288,6 +294,8 @@
     // Game State
 
     let state = {
+        isPlaying: false,
+
         score: 0,
         totalCompletedLines: 0,
 
@@ -315,7 +323,14 @@
     }
 
     function keyup(event) {
-        var key = keyMap[event.keyCode];
+        var keyCode = event.keyCode;
+
+        if (keyCode === 32 || keyCode === 13) {
+            state.isPlaying = true;
+            return;
+        }
+
+        var key = keyMap[keyCode];
         state.actions.push(key);
     }
 
@@ -324,6 +339,9 @@
     // Game Loop
 
     function update(progress) {
+        if (!state.isPlaying) {
+            return;
+        }
 
         var nextAction = state.actions.shift();
 
@@ -366,7 +384,7 @@
     }
 
 
-    function drawText(y, text){
+    function drawText(y, text) {
 
         const xStart = 220;
         const xEnd = 380;
@@ -384,7 +402,7 @@
         ctx.fillText(text, xStart, y);
     }
 
-    function getLevel(){
+    function getLevel() {
         return Math.floor(state.totalCompletedLines / 10);
     }
 
@@ -403,7 +421,7 @@
         drawText(y, "Lines: " + state.totalCompletedLines);
     }
 
-    function drawNext(){
+    function drawNext() {
         const xStart = 220;
         const xEnd = 380;
         const y = 140;
