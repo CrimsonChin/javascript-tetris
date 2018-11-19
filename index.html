@@ -37,7 +37,7 @@
             <canvas id="game-viewport" class="game-viewport" width="400" height="400"></canvas>
 
             <h2>Instructions</h2>
-            <p>Press Spacebar to start a game.</p>
+            <p>Press spacebar to start a new game.</p>
             <ul>
                 <li><b>W</b> rotate the tetromino</li>
                 <li><b>A</b> move the tetromino left</li>
@@ -223,7 +223,7 @@
             setNextShape();
 
             if (occupied(state.x, state.y, state.currentShape, state.rotationIdx)) {
-                alert("Game Over");
+                alert("Game Over.\nPress spacebar to start a new game.");
                 state.isPlaying = false;
             }
         }
@@ -277,7 +277,7 @@
     const height = 20;
 
     const blockSize = 20;
-    const stepTime = 1;
+    const stepTime = 0.5;
 
     const canvas = document.getElementById("game-viewport");
     const ctx = canvas.getContext("2d");
@@ -325,6 +325,7 @@
 
         if (keyCode === 32 || keyCode === 13) {
             state.isPlaying = true;
+            newGame();
             return;
         }
 
@@ -435,6 +436,12 @@
     }
 
     function draw() {
+
+        if (!state.isPlaying){
+            return;
+        }
+
+
         ctx.save();
 
         ctx.lineWidth = 1;
@@ -482,6 +489,20 @@
         }
     }
 
+    function newGame(){
+        state.score = 0;
+        state.totalCompletedLines = 0;
+
+        var shape = getRandomShape();
+        setCurrentShape(shape);
+        setNextShape();
+
+        state.board = new Array(20);
+        for (var i = 0; i < state.board.length; i++) {
+            state.board[i] = new Array(10).fill(0);
+        }
+    }
+
     function run() {
         function loop(timestamp) {
             var progress = timestamp - lastRender;
@@ -496,18 +517,7 @@
         var lastRender = 0;
         window.requestAnimationFrame(loop);
 
-        // Reset game etc
-       	var shape = getRandomShape();
-        setCurrentShape(shape);
-        setNextShape();
-
-        // This fills the board with copies of the same array.
-        //state.board = new Array(20).fill(new Array(10).fill(0));
-
-        state.board = new Array(20);
-        for (var i = 0; i < state.board.length; i++) {
-            state.board[i] = new Array(10).fill(0);
-        }
+        newGame();
     }
 
     run();
