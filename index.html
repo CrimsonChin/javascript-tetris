@@ -16,15 +16,37 @@
             color: #fff
         }
 
-        .game-viewport {
+        #viewport {
+            position: relative;
             margin: 0px auto;
+            width: 400px;
+            height: 400px;
             /* border: 1px black solid; */
         }
 
+        .start {
+            position: absolute;
+            z-index: 1;
+        }
+
+        .game {
+            position: absolute;
+            z-index: 0;
+        }
+
+        .gameover {
+            position: absolute;
+            display: none;
+            z-index: 1;
+            background: white;
+            width: 400px;
+            height: 400px;
+        }
         .container {
             width: 800px;
             margin: 0px auto;
         }
+
     </style>
 </head>
 
@@ -34,8 +56,17 @@
     </header>
     <div>
         <div class="container">
-            <canvas id="game-viewport" class="game-viewport" width="400" height="400"></canvas>
-
+            <div id="viewport">
+                <div id="start" class="game-viewport start">
+                    <h1>Press Spacebar to start</h1>
+                </div>
+                <canvas id="game-viewport" class="game-viewport game" width="400" height="400"></canvas>
+                <div id="gameover" class="game-viewport gameover">
+                    <h1>Game over</h1>
+                    <p>You scored: <span id="score"></span></p>
+                </div>
+            </div>
+            
             <h2>Instructions</h2>
             <p>Press spacebar to start a new game.</p>
             <ul>
@@ -223,7 +254,13 @@
             setNextShape();
 
             if (occupied(state.x, state.y, state.currentShape, state.rotationIdx)) {
-                alert("Game Over.\nPress spacebar to start a new game.");
+                
+                var gameOverScreen = document.getElementById("gameover");
+                gameOverScreen.style.display = "block";
+
+                var score = document.getElementById("score");
+                score.innerHTML = state.score;
+
                 state.isPlaying = false;
             }
         }
@@ -325,6 +362,10 @@
 
         if (keyCode === 32 || keyCode === 13) {
             state.isPlaying = true;
+
+            var startScreen = document.getElementById("start");
+            startScreen.style.display = "none";
+
             newGame();
             return;
         }
@@ -503,6 +544,8 @@
         }
     }
 
+
+
     function run() {
         function loop(timestamp) {
             var progress = timestamp - lastRender;
@@ -521,6 +564,8 @@
     }
 
     run();
+
+    //el.childNodes.item("child").style.display = "none";
 </script>
 
 </html>
