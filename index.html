@@ -3,6 +3,7 @@
 <head>
     <title>Tetris</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Bungee" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto Mono', monospace;
@@ -21,12 +22,15 @@
             margin: 0px auto;
             width: 400px;
             height: 400px;
+            background: #393c40;
             /* border: 1px black solid; */
         }
 
         .start {
             position: absolute;
             z-index: 1;
+            width: 400px;
+            height: 400px;
         }
 
         .game {
@@ -38,10 +42,39 @@
             position: absolute;
             display: none;
             z-index: 1;
-            background: white;
             width: 400px;
             height: 400px;
         }
+
+        .gameover-board {
+            margin: 130px 20px 20px 20px;
+            
+            background:#0d8bb1;
+            padding: 5px;
+        }
+
+        #viewport h1 {
+            background: transparent;
+            font-size: 50px;
+            padding: 0px;
+            font-family: 'Bungee', cursive;
+        }
+
+        .start h1 {
+            margin-top: 80px;
+        }
+
+        .gameover h1 {
+            margin: 0px;
+        }
+
+        #viewport p {
+            color: white;
+            font-family: 'Bungee', cursive;
+            text-align: center;
+            margin: 0px;
+        }
+
         .container {
             width: 800px;
             margin: 0px auto;
@@ -58,12 +91,14 @@
         <div class="container">
             <div id="viewport">
                 <div id="start" class="game-viewport start">
-                    <h1>Press Spacebar to start</h1>
+                    <h1>NOT TETRIS</h1>
+                    <p>Press Spacebar to start</p>
                 </div>
                 <canvas id="game-viewport" class="game-viewport game" width="400" height="400"></canvas>
                 <div id="gameover" class="game-viewport gameover">
+                    <div class="gameover-board">
                     <h1>Game over</h1>
-                    <p>You scored: <span id="score"></span></p>
+                    </div>
                 </div>
             </div>
             
@@ -258,9 +293,6 @@
                 var gameOverScreen = document.getElementById("gameover");
                 gameOverScreen.style.display = "block";
 
-                var score = document.getElementById("score");
-                score.innerHTML = state.score;
-
                 state.isPlaying = false;
             }
         }
@@ -366,6 +398,9 @@
             var startScreen = document.getElementById("start");
             startScreen.style.display = "none";
 
+            var gameOverScreen = document.getElementById("gameover");
+            gameOverScreen.style.display = "none";
+
             newGame();
             return;
         }
@@ -438,7 +473,7 @@
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
         ctx.font = "20px monospace";
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#fff";
         ctx.fillText(text, xStart, y);
     }
 
@@ -482,16 +517,17 @@
             return;
         }
 
-
         ctx.save();
 
         ctx.lineWidth = 1;
         ctx.translate(0.5, 0.5);
 
         ctx.clearRect(0, 0, width * blockSize, height * blockSize);
-        ctx.fillStyle = '#eee';
-        ctx.fillRect(0, 0, width * blockSize, height * blockSize);
-
+        ctx.fillStyle = '#393c40';
+        
+        //ctx.fillRect(0, 0, width * blockSize, height * blockSize);
+        ctx.strokeStyle = '#54595f';
+        ctx.strokeRect(0, 0, width * blockSize, height * blockSize);
         // falling block
         each(state.x, state.y, state.currentShape, state.rotationIdx, drawBlock);
 
@@ -550,7 +586,7 @@
         function loop(timestamp) {
             var progress = timestamp - lastRender;
 
-            update(progress / 1000);
+            update(progress / 500);
             draw();
 
             lastRender = timestamp;
